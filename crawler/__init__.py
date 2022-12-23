@@ -1,1 +1,1 @@
-from .image import processImage
+from .image import train
