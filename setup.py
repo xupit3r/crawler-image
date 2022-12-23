@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Learn more: https://github.com/kennethreitz/setup.py
-
 from setuptools import setup, find_packages
 
 
@@ -12,13 +10,13 @@ with open('LICENSE') as f:
     license = f.read()
 
 setup(
-    name='sample',
-    version='0.1.0',
-    description='Sample package for Python-Guide.org',
+    name='crawler-image',
+    version='1.0.0',
+    description='Some image classification stuff for my crawler',
     long_description=readme,
-    author='Kenneth Reitz',
-    author_email='me@kennethreitz.com',
-    url='https://github.com/kennethreitz/samplemod',
+    author='Joe D\'Alessandro',
+    author_email='joe@thejoeshow.net',
+    url='https://github.com/xupit3r/crawler-image',
     license=license,
     packages=find_packages(exclude=('tests', 'docs'))
 )

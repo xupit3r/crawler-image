@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .context import sample
+from .context import crawler
 
 import unittest
 
@@ -8,8 +8,8 @@ import unittest
 class AdvancedTestSuite(unittest.TestCase):
     """Advanced test cases."""
 
-    def test_thoughts(self):
-        self.assertIsNone(sample.hmm())
+    def test_process_image(self):
+        self.assertEqual(crawler.processImage(), 'processing image')
 
 
 if __name__ == '__main__':
