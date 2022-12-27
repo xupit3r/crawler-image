@@ -1,6 +1,8 @@
-import crawler as c
+import numpy as np
+from crawler.image import pizza_predict
+from crawler.utils import load_image
 
-c.train(
-  save_model=True,
-  plot_results=True
-)
+notPizzaImg = load_image('pictures/hot-dog.jpg')
+pizzaImg = load_image('pictures/pizza.jpg')
+print(pizza_predict(notPizzaImg))
+print(pizza_predict(pizzaImg))

@@ -2,8 +2,9 @@ from crawler.models import pizza_model
 from crawler.datasets import prepare_data
 from crawler.review import plot_result
 from crawler.gpu import setup_gpus
-import tensorflow as tf
 from dotenv import dotenv_values
+import tensorflow as tf
+import numpy as np
 
 config = dotenv_values('.env')
 
@@ -42,3 +43,19 @@ def train(save_model=False, plot_results=False):
   )
   if plot_results:
     plot_result(history)
+
+def load_model(model=None):
+  try:
+    model = tf.keras.models.load_model(f'models/{model}.keras')
+    return model
+  except IOError as err:
+    print(f'failed to load model {model} --- {err}')
+  
+  return False
+
+def pizza_predict(image):
+  CLASSES = ['not pizza', 'pizza']
+  model = load_model('pizza')
+  predictions = model.predict(image)
+  class_index = np.argmax(predictions[0])
+  return CLASSES[class_index]
