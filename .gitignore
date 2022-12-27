@@ -91,3 +91,9 @@ ENV/
 
 # vscode
 .vscode
+
+# ignore datasets directory
+.datasets
+
+# ignore .env
+.env

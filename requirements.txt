@@ -2,3 +2,4 @@ nose2
 tensorflow
 tensorflow-datasets
 tensorflow-rocm
+python-dotenv
