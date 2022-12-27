@@ -11,7 +11,7 @@ tf.get_logger().setLevel('ERROR')
 
 setup_gpus()
 
-def train():
+def train(save_model=False, plot_results=False):
   ds_train, ds_val = prepare_data(
     url=config['DATASET_URL'],
     name=config['DATASET_NAME']
@@ -23,13 +23,16 @@ def train():
 
   model = pizza_model(num_classes)
 
-  callbacks = [
-    tf.keras.callbacks.ModelCheckpoint(
-      filepath='models/pizza.keras',
-      save_best_only=True,
-      monitor='val_loss'
-    )
-  ]
+  if save_model:
+    callbacks = [
+      tf.keras.callbacks.ModelCheckpoint(
+        filepath='models/pizza.keras',
+        save_best_only=True,
+        monitor='val_loss'
+      )
+    ]
+  else:
+    callbacks = None
 
   history = model.fit(
     ds_train,
@@ -37,5 +40,5 @@ def train():
     validation_data=ds_val,
     callbacks=callbacks
   )
-
-  plot_result(history)
+  if plot_results:
+    plot_result(history)
