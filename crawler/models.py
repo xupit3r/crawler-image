@@ -29,6 +29,38 @@ def pizza_model(num_classes):
 
   return model
 
+# classifies food
+def food_model(num_classes):
+  model = tf.keras.Sequential([
+    tf.keras.layers.Rescaling(1./255),
+    tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
+    tf.keras.layers.MaxPooling2D(),
+    tf.keras.layers.Conv2D(128, 3, padding='same', activation='relu'),
+    tf.keras.layers.MaxPooling2D(),
+    tf.keras.layers.Conv2D(256, 3, padding='same', activation='relu'),
+    tf.keras.layers.MaxPooling2D(),
+    tf.keras.layers.Conv2D(512, 3, padding='same', activation='relu'),
+    tf.keras.layers.MaxPooling2D(strides=(2,2)),
+    tf.keras.layers.Conv2D(512, 3, padding='same', activation='relu'),
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.Dense(101, activity_regularizer=tf.keras.regularizers.L2(0.01)),
+    tf.keras.layers.Dropout(0.5),
+    tf.keras.layers.Dense(num_classes, activation='softmax')
+  ])
+
+  model.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=5e-4),
+    loss='categorical_crossentropy',
+    metrics=['accuracy'],
+  )
+
+  return model
+
+def food_model_summary():
+  model = food_model(101)
+  model.build((Any, 128, 128, 3))
+  model.summary()
+
 # a tuned version of the VGG16 classifier
 def tuned_VGG16(num_classes):
   base = tf.keras.applications.VGG16(

@@ -1,6 +1,6 @@
-from crawler.models import pizza_model
+from crawler.models import food_model, food_model_summary
 from crawler.datasets import prepare_data
-from crawler.review import plot_result
+from crawler.review import plot_result, review_dataset
 from crawler.gpu import setup_gpus
 from dotenv import dotenv_values
 import tensorflow as tf
@@ -12,35 +12,51 @@ tf.get_logger().setLevel('ERROR')
 
 setup_gpus()
 
-def train(save_model=False, plot_results=False):
+def train(show_summary=False, save_model=False, show_examples=False, early_stop=False, plot_results=False):
   ds_train, ds_val = prepare_data(
     url=config['DATASET_URL'],
     name=config['DATASET_NAME']
   )
 
-  num_classes = 2
+  if show_summary:
+    food_model_summary()
+
+  if show_examples:
+    review_dataset(ds_train)
+
+  num_classes = len(ds_train.class_names)
   ds_train = ds_train.prefetch(buffer_size=tf.data.AUTOTUNE)
   ds_val = ds_val.prefetch(buffer_size=tf.data.AUTOTUNE)
 
-  model = pizza_model(num_classes)
+  model = food_model(num_classes)
 
+  callbacks = []
+
+  # if we want to save the model, add the callback
   if save_model:
-    callbacks = [
+    callbacks.append(
       tf.keras.callbacks.ModelCheckpoint(
-        filepath='models/pizza.keras',
+        filepath='models/food.keras',
         save_best_only=True,
         monitor='val_loss'
       )
-    ]
-  else:
-    callbacks = None
+    )
+
+  # if we want to do some early stopping, add the callback
+  if early_stop:
+    callbacks.append(
+      tf.keras.callbacks.EarlyStopping(
+        patience=2
+      )
+    )
 
   history = model.fit(
     ds_train,
-    epochs=30,
+    epochs=100,
     validation_data=ds_val,
     callbacks=callbacks
   )
+
   if plot_results:
     plot_result(history)
 

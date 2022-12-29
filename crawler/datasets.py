@@ -1,4 +1,3 @@
-import tensorflow_datasets as tfds
 import tensorflow as tf
 import pathlib
 
@@ -11,21 +10,24 @@ def prepare_data(url, name):
   )
   
   data_dir = pathlib.Path(data_dir)
-  batch_size = 32
-  image_height = 180
-  image_width = 180
+  batch_size = 256
+  image_height = 128
+  image_width = 128
 
   ds_train = tf.keras.utils.image_dataset_from_directory(
     data_dir,
+    label_mode='categorical',
     validation_split=0.2,
     subset='training',
     seed=123,
     image_size=(image_height, image_width),
     batch_size=batch_size
   )
+  
 
   ds_val = tf.keras.utils.image_dataset_from_directory(
     data_dir,
+    label_mode='categorical',
     validation_split=0.2,
     subset='validation',
     seed=123,
