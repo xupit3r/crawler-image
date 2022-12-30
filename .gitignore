@@ -97,3 +97,6 @@ ENV/
 
 # ignore .env
 .env
+
+# directory for our saved models
+.models
