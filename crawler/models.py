@@ -1,4 +1,7 @@
+from ast import Lambda
+import numpy as np
 from tensorflow import keras
+from tensorflow.image import rgb_to_grayscale
 from tensorflow.keras import layers, regularizers
 
 # classifies pizza and not pizza
@@ -33,16 +36,34 @@ def pizza_model(num_classes):
   return model
 
 
+def load_model(model=None):
+  try:
+    model = keras.models.load_model(f'models/{model}.keras')
+    return model
+  except IOError as err:
+    print(f'failed to load model {model} --- {err}')
+  
+  return False
+
+def pizza_predict(image):
+  CLASSES = ['not pizza', 'pizza']
+  model = load_model('pizza')
+  predictions = model.predict(image)
+  class_index = np.argmax(predictions[0])
+  return CLASSES[class_index]
+
 # an image classifier
 def image_joe(num_classes=1, image_height=128, image_width=128, channels=3):
   # inputs
   inputs = keras.Input(name='image', shape=(image_height, image_width, channels))
 
+  converted = layers.Lambda(lambda x: rgb_to_grayscale(x))(inputs)
+
   # block 1
   # rescaling = layers.Rescaling(1./255)(inputs)
 
   # block 2
-  conv_1 = layers.Conv2D(64, 3, padding='same', activation='relu')(inputs)
+  conv_1 = layers.Conv2D(64, 3, padding='same', activation='relu')(converted)
   batched_1 = layers.BatchNormalization()(conv_1)
 
   # block 3

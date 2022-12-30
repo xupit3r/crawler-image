@@ -2,7 +2,7 @@ init:
 	pip install -r requirements.txt
 
 train:
-	TF_CPP_MIN_LOG_LEVEL=3 python3 train.py
+	TF_CPP_MIN_LOG_LEVEL=3 python3 image.py
 
 predict:
 	TF_CPP_MIN_LOG_LEVEL=3 python3 predict.py
