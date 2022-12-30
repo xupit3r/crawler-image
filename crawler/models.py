@@ -1,24 +1,27 @@
-import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers, regularizers
 
 # classifies pizza and not pizza
 def pizza_model(num_classes):
-  model = tf.keras.Sequential([
-    tf.keras.layers.RandomFlip('horizontal'),
-    tf.keras.layers.RandomRotation(0.1),
-    tf.keras.layers.RandomZoom(0.2),
-    tf.keras.layers.Rescaling(1./255),
-    tf.keras.layers.Conv2D(32, 3, activation='relu'),
-    tf.keras.layers.MaxPooling2D(pool_size=2),
-    tf.keras.layers.Conv2D(64, 3, activation='relu'),
-    tf.keras.layers.MaxPooling2D(pool_size=2),
-    tf.keras.layers.Conv2D(128, 3, activation='relu'),
-    tf.keras.layers.MaxPooling2D(pool_size=2),
-    tf.keras.layers.Conv2D(256, 3, activation='relu'),
-    tf.keras.layers.MaxPooling2D(pool_size=2),
-    tf.keras.layers.Conv2D(256, 3, activation='relu'),
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dropout(0.5),
-    tf.keras.layers.Dense(num_classes, activation='sigmoid')
+  model = keras.Sequential([
+    layers.RandomFlip('horizontal'),
+    layers.RandomRotation(0.1),
+    layers.RandomZoom(0.2),
+    layers.Rescaling(1./255),
+    layers.Conv2D(32,
+    3,
+    activation='relu'),
+    layers.MaxPooling2D(pool_size=2),
+    layers.Conv2D(64, 3, activation='relu'),
+    layers.MaxPooling2D(pool_size=2),
+    layers.Conv2D(128, 3, activation='relu'),
+    layers.MaxPooling2D(pool_size=2),
+    layers.Conv2D(256, 3, activation='relu'),
+    layers.MaxPooling2D(pool_size=2),
+    layers.Conv2D(256, 3, activation='relu'),
+    layers.Flatten(),
+    layers.Dropout(0.5),
+    layers.Dense(num_classes, activation='sigmoid')
   ])
 
   model.compile(
@@ -29,66 +32,58 @@ def pizza_model(num_classes):
 
   return model
 
-# classifies food
-def food_model(num_classes):
-  model = tf.keras.Sequential([
-    tf.keras.layers.Rescaling(1./255),
-    tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(128, 3, padding='same', activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(256, 3, padding='same', activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(512, 3, padding='same', activation='relu'),
-    tf.keras.layers.MaxPooling2D(strides=(2,2)),
-    tf.keras.layers.Conv2D(512, 3, padding='same', activation='relu'),
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(101, activity_regularizer=tf.keras.regularizers.L2(0.01)),
-    tf.keras.layers.Dropout(0.5),
-    tf.keras.layers.Dense(num_classes, activation='softmax')
-  ])
+# an image classifier
+def image_joe(num_classes=1, image_height=128, image_width=128, channels=3):
+  # inputs
+  inputs = keras.Input(name='image', shape=(image_height, image_width, channels))
+
+  # block 1
+  rescaling = layers.Rescaling(1./255)(inputs)
+
+  # block 2
+  conv_1 = layers.Conv2D(64, 3, padding='same', activation='relu')(rescaling)
+  batched_1 = layers.BatchNormalization()(conv_1)
+
+  # block 3
+  conv_2 = layers.Conv2D(128, 3, padding='same', activation='relu')(batched_1)
+  batched_2 = layers.BatchNormalization()(conv_2)
+
+  # block 4
+  conv_5 = layers.Conv2D(256, 3, padding='same', activation='relu')(batched_2)
+  conv_6 = layers.Conv2D(256, 3, padding='same', activation='relu')(conv_5)
+  pool_1 = layers.MaxPooling2D((2,2), padding='same')(conv_6)
+
+  # block 5
+  flatten = layers.Flatten()(pool_1)
+  dense_1 = layers.Dense(
+    4096,
+    activation='relu',
+    kernel_regularizer=regularizers.l2(0.002)
+  )(flatten)
+  dropout_1 = layers.Dropout(0.5)(dense_1)
+  dense_2 = layers.Dense(
+    4096,
+    activation='relu',
+    kernel_regularizer=regularizers.l2(0.002)
+  )(dropout_1)
+  dropout_2 = layers.Dropout(0.25)(dense_2)
+  dense_3 = layers.Dense(
+    4096,
+    activation='relu',
+    kernel_regularizer=regularizers.l2(0.002)
+  )(dropout_2)
+
+  # outputs
+  outputs = layers.Dense(num_classes, activation='softmax')(dense_3)
+
+  model = keras.Model(
+    inputs=inputs,
+    outputs=outputs
+  )
 
   model.compile(
-    optimizer=tf.keras.optimizers.Adam(learning_rate=5e-4),
+    optimizer=keras.optimizers.Adam(learning_rate=10e-5),
     loss='categorical_crossentropy',
-    metrics=['accuracy'],
-  )
-
-  return model
-
-def food_model_summary():
-  model = food_model(101)
-  model.build((Any, 128, 128, 3))
-  model.summary()
-
-# a tuned version of the VGG16 classifier
-def tuned_VGG16(num_classes):
-  base = tf.keras.applications.VGG16(
-    include_top=False
-  )
-
-  for layer in base.layers[:-2]:
-    layer.trainable = False
-
-  inputs = tf.keras.Input(shape=(180, 180, 3))
-  augment = tf.keras.Sequential([
-    tf.keras.layers.RandomFlip('horizontal'),
-    tf.keras.layers.RandomRotation(0.1),
-    tf.keras.layers.RandomZoom(0.2)
-  ])
-
-  x = augment(inputs)
-  x = tf.keras.applications.vgg16.preprocess_input(x)
-  x = base(x)
-  x = tf.keras.layers.Flatten()(x)
-  x = tf.keras.layers.Dense(256)(x)
-  x = tf.keras.layers.Dropout(0.5)(x)
-  outputs = tf.keras.layers.Dense(num_classes, activation='softmax')(x)
-
-  model = tf.keras.Model(inputs, outputs)
-  model.compile(
-    optimizer=tf.keras.optimizers.RMSprop(learning_rate=1e-5),
-    loss='sparse_categorical_crossentropy',
     metrics=['accuracy'],
   )
 

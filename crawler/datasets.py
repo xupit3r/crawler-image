@@ -2,7 +2,7 @@ import tensorflow as tf
 import pathlib
 
 # reads and prepares a dataset
-def prepare_data(url, name):
+def prepare_data(url, name, batch_size=32, image_height=128, image_width=128):
   data_dir = tf.keras.utils.get_file(
     origin=url,
     fname=name,
@@ -10,9 +10,6 @@ def prepare_data(url, name):
   )
   
   data_dir = pathlib.Path(data_dir)
-  batch_size = 256
-  image_height = 128
-  image_width = 128
 
   ds_train = tf.keras.utils.image_dataset_from_directory(
     data_dir,
@@ -36,3 +33,10 @@ def prepare_data(url, name):
   )
 
   return ds_train, ds_val
+
+def convert_dataset(item):
+    """Puts the mnist dataset in the format Keras expects, (features, labels)."""
+    image = item['image']
+    label = item['label']
+    image = tf.dtypes.cast(image, 'float32') / 255.
+    return image, label
