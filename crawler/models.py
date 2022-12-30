@@ -32,16 +32,17 @@ def pizza_model(num_classes):
 
   return model
 
+
 # an image classifier
 def image_joe(num_classes=1, image_height=128, image_width=128, channels=3):
   # inputs
   inputs = keras.Input(name='image', shape=(image_height, image_width, channels))
 
   # block 1
-  rescaling = layers.Rescaling(1./255)(inputs)
+  # rescaling = layers.Rescaling(1./255)(inputs)
 
   # block 2
-  conv_1 = layers.Conv2D(64, 3, padding='same', activation='relu')(rescaling)
+  conv_1 = layers.Conv2D(64, 3, padding='same', activation='relu')(inputs)
   batched_1 = layers.BatchNormalization()(conv_1)
 
   # block 3
@@ -56,19 +57,19 @@ def image_joe(num_classes=1, image_height=128, image_width=128, channels=3):
   # block 5
   flatten = layers.Flatten()(pool_1)
   dense_1 = layers.Dense(
-    4096,
+    2048,
     activation='relu',
     kernel_regularizer=regularizers.l2(0.002)
   )(flatten)
   dropout_1 = layers.Dropout(0.5)(dense_1)
   dense_2 = layers.Dense(
-    4096,
+    2048,
     activation='relu',
     kernel_regularizer=regularizers.l2(0.002)
   )(dropout_1)
   dropout_2 = layers.Dropout(0.25)(dense_2)
   dense_3 = layers.Dense(
-    4096,
+    2048,
     activation='relu',
     kernel_regularizer=regularizers.l2(0.002)
   )(dropout_2)

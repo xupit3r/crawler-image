@@ -67,7 +67,7 @@ def train(show_summary=False, save_model=False, show_examples=False, early_stop=
   if save_model:
     callbacks.append(
       tf.keras.callbacks.ModelCheckpoint(
-        filepath='models/food.keras',
+        filepath='.models/food.keras',
         save_best_only=True,
         monitor='val_loss'
       )
